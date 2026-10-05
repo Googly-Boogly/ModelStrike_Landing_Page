@@ -1,0 +1,37 @@
+# docker compose up --build
+#
+# Configuration comes from `.env` next to this file (copy .env.example).
+# - NEXT_PUBLIC_* and CSP_* are build args: change them → rebuild.
+# - CONTACT_* / RESEND_* are runtime secrets: change them → restart.
+
+services:
+  web:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+        NEXT_PUBLIC_CONTACT_EMAIL: ${NEXT_PUBLIC_CONTACT_EMAIL:-}
+        NEXT_PUBLIC_SECURITY_EMAIL: ${NEXT_PUBLIC_SECURITY_EMAIL:-}
+        NEXT_PUBLIC_BOOKING_URL: ${NEXT_PUBLIC_BOOKING_URL:-}
+        NEXT_PUBLIC_LINKEDIN_URL: ${NEXT_PUBLIC_LINKEDIN_URL:-}
+        NEXT_PUBLIC_X_URL: ${NEXT_PUBLIC_X_URL:-}
+        NEXT_PUBLIC_GITHUB_URL: ${NEXT_PUBLIC_GITHUB_URL:-}
+        CSP_SCRIPT_SRC: ${CSP_SCRIPT_SRC:-}
+        CSP_CONNECT_SRC: ${CSP_CONNECT_SRC:-}
+        CSP_FRAME_SRC: ${CSP_FRAME_SRC:-}
+    image: modelstrike-website:latest
+    env_file:
+      - path: .env
+        required: false
+    ports:
+      - "${PORT:-3000}:3000"
+    restart: unless-stopped
+    # Hardening: immutable filesystem, no privileges, no Linux capabilities.
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/.next/cache:uid=1000,gid=1000 # image optimization cache
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

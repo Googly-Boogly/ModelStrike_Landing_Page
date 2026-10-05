@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens. The site is intentionally dark-only: it is part of the
+ * brand, and every color pair below is checked for WCAG AA contrast
+ * against the page background.
+ */
+@theme {
+  --color-ink-950: #08090b;
+  --color-ink-900: #0d0f12;
+  --color-ink-850: #121519;
+  --color-ink-800: #181c21;
+
+  --color-line: #1f2329;
+  --color-line-strong: #2c3138;
+
+  --color-fg: #ececee;
+  --color-fg-muted: #a3a9b2;
+  --color-fg-subtle: #80868f;
+
+  /* "Strike" accent. 400 is for text/strokes on dark; 600 carries white text. */
+  --color-strike-300: #ff8f91;
+  --color-strike-400: #ef5357;
+  --color-strike-500: #d93d42;
+  --color-strike-600: #c3343a;
+  --color-strike-700: #a82b30;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  --animate-rise: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-dash: dash 1.6s linear infinite;
+  --animate-pulse-ring: pulse-ring 2.4s ease-out infinite;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes dash {
+    to {
+      stroke-dashoffset: -20;
+    }
+  }
+
+  @keyframes pulse-ring {
+    0% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.9);
+    }
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    background-color: var(--color-ink-950);
+    scroll-behavior: smooth;
+    /* Keep anchor targets and focused fields clear of the sticky header. */
+    scroll-padding-top: 5.5rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-ink-950);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+  }
+
+
+  ::selection {
+    background-color: var(--color-strike-600);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-strike-400);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+}
+
+/* Motion is opt-in: nothing animates for users who prefer reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@utility bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
