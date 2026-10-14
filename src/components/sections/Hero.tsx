@@ -29,7 +29,13 @@ export function Hero() {
             before attackers—or autonomous systems themselves—turn them into incidents.
           </p>
           <p className="mt-6 max-w-xl border-l-2 border-strike-400 pl-4 text-sm leading-relaxed text-pretty text-fg-muted sm:text-base">
-            {heroProofPoint}
+            {heroProofPoint}{" "}
+            <a
+              href="#case-study-details"
+              className="font-medium whitespace-nowrap text-strike-400 underline-offset-4 hover:underline"
+            >
+              Read the full finding <span aria-hidden="true">→</span>
+            </a>
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <ButtonLink href={bookingHref} size="lg" arrow>

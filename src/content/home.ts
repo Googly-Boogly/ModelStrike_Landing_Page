@@ -6,6 +6,47 @@
 export const heroProofPoint =
   "A translation agent was handed text with a command hidden inside it. Instead of translating the command, the agent obeyed it. We confirmed the exploit with a planted canary string — a deterministic result, not a guess — and delivered the fix.";
 
+export type CaseStudy = {
+  title: string;
+  meta: { label: string; value: string }[];
+  sections: { heading: string; body: string }[];
+  disclaimer: string;
+};
+
+/** Full write-up behind `heroProofPoint`, rendered in the case-study section. */
+export const caseStudy: CaseStudy = {
+  title: "Prompt injection in a translation agent",
+  meta: [
+    { label: "Severity", value: "High" },
+    { label: "Category", value: "OWASP LLM01: Prompt Injection" },
+    { label: "Status", value: "Confirmed, remediated" },
+  ],
+  sections: [
+    {
+      heading: "What we tested",
+      body: "A translation agent was asked to translate a block of text into several languages. Hidden inside that text was an instruction aimed at the agent itself, telling it to stop its task and output a fixed string.",
+    },
+    {
+      heading: "What we found",
+      body: "The agent obeyed the hidden instruction instead of translating it — it emitted the attacker’s string and invented status details that were never part of the task. Because the agent read untrusted input in the same channel as its own instructions, anyone who controlled that input could redirect its behavior.",
+    },
+    {
+      heading: "Why it matters",
+      body: "On a translation demo the damage looks small. The mechanism is the risk: the same path applies to any agent that can take actions. An agent that can be steered by its own inputs can be pushed to issue refunds, send emails, or reach data it shouldn’t — with no login required, just text the agent will read.",
+    },
+    {
+      heading: "How we proved it",
+      body: "We don’t let a model grade its own output. We plant a unique canary string and confirm the exploit only if that string surfaces where it shouldn’t. Deterministic evidence, near-zero false positives — the standard your auditors and enterprise reviewers expect.",
+    },
+    {
+      heading: "The fix we delivered",
+      body: "Separate data from instructions, validate the output against the task, scope the agent to least privilege, and require human approval for any high-impact action.",
+    },
+  ],
+  disclaimer:
+    "This is a sanitized example. Every engagement is run only against systems you authorize, in a staging environment, under a signed rules-of-engagement agreement.",
+};
+
 export const agentCapabilities = [
   "interpret untrusted instructions",
   "invoke tools",

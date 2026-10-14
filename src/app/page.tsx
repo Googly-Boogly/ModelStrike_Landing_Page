@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { site } from "@/content/site";
 import { Hero } from "@/components/sections/Hero";
+import { CaseStudy } from "@/components/sections/CaseStudy";
 import { AttackSurface } from "@/components/sections/AttackSurface";
 import { WhatWeTest } from "@/components/sections/WhatWeTest";
 import { Services } from "@/components/sections/Services";
@@ -20,6 +21,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <CaseStudy />
       <AttackSurface />
       <WhatWeTest />
       <Services />
