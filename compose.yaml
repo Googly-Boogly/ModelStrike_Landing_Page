@@ -23,6 +23,9 @@ services:
     env_file:
       - path: .env
         required: false
+    environment:
+      # PORT in .env picks the host port only; the server always listens on 3000.
+      PORT: "3000"
     ports:
       - "${PORT:-3000}:3000"
     restart: unless-stopped

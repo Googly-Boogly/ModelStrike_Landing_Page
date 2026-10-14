@@ -1,4 +1,5 @@
 import { bookingHref } from "@/content/site";
+import { heroProofPoint } from "@/content/home";
 import { ButtonLink } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Section";
 import { Eyebrow } from "@/components/ui/SectionHeader";
@@ -26,6 +27,9 @@ export function Hero() {
           <p className="mt-6 max-w-xl text-base leading-relaxed text-pretty text-fg-muted sm:text-lg">
             ModelStrike red-teams AI agents, tools, permissions, prompts, and integrations to uncover security failures
             before attackers—or autonomous systems themselves—turn them into incidents.
+          </p>
+          <p className="mt-6 max-w-xl border-l-2 border-strike-400 pl-4 text-sm leading-relaxed text-pretty text-fg-muted sm:text-base">
+            {heroProofPoint}
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <ButtonLink href={bookingHref} size="lg" arrow>

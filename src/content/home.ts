@@ -2,6 +2,10 @@
  * Homepage copy. Edit text here; components only handle layout.
  */
 
+/** Short engagement story shown in the hero. */
+export const heroProofPoint =
+  "A translation agent was handed text with a command hidden inside it. Instead of translating the command, the agent obeyed it. We confirmed the exploit with a planted canary string — a deterministic result, not a guess — and delivered the fix.";
+
 export const agentCapabilities = [
   "interpret untrusted instructions",
   "invoke tools",
