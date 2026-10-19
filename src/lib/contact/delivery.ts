@@ -1,5 +1,6 @@
 import "server-only";
 import { createHmac } from "node:crypto";
+import { site } from "@/content/site";
 import type { ContactSubmission } from "./schema";
 
 /**
@@ -16,6 +17,10 @@ import type { ContactSubmission } from "./schema";
  *
  * To add another provider (Postmark, SES, HubSpot…), implement
  * `ContactDelivery` and register it in `resolveDelivery`.
+ *
+ * Separately, when RESEND_API_KEY and CONTACT_FROM_EMAIL are set, the visitor
+ * gets a confirmation email (see `resolveConfirmation`), whichever provider
+ * delivers the request itself.
  */
 
 export type ContactDelivery = {
@@ -46,6 +51,26 @@ function formatPlainText(s: ContactSubmission, meta: SubmissionMeta): string {
     "",
     "What would you like us to test?",
     s.testScope || "(not provided)",
+  ].join("\n");
+}
+
+/**
+ * Deliberately contains nothing the visitor typed: the recipient address is
+ * unverified, so echoing submitted text would let anyone use the form to send
+ * their own content to an arbitrary inbox under our name.
+ */
+function formatConfirmationText(): string {
+  return [
+    "Hello,",
+    "",
+    `Thanks for requesting an AI security assessment from ${site.name}. This email confirms we've received your request.`,
+    "",
+    "We'll review what you've shared and follow up from a team address to schedule a short scoping call.",
+    "",
+    "If you didn't submit this request, you can ignore this email — nothing further will happen.",
+    "",
+    `— The ${site.name} team`,
+    site.url,
   ].join("\n");
 }
 
@@ -83,6 +108,39 @@ function resendDelivery(apiKey: string, to: string, from: string): ContactDelive
       if (!response.ok) throw new Error(`Resend responded with ${response.status}`);
     },
   };
+}
+
+export type ConfirmationSender = {
+  name: string;
+  send(to: string): Promise<void>;
+};
+
+function resendConfirmation(apiKey: string, from: string, replyTo: string | undefined): ConfirmationSender {
+  return {
+    name: "resend",
+    async send(to) {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from,
+          to: [to],
+          ...(replyTo ? { reply_to: replyTo } : {}),
+          subject: `We've received your ${site.name} assessment request`,
+          text: formatConfirmationText(),
+        }),
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+      if (!response.ok) throw new Error(`Resend responded with ${response.status}`);
+    },
+  };
+}
+
+/** Sender for the visitor's confirmation email, or null when Resend isn't configured. */
+export function resolveConfirmation(): ConfirmationSender | null {
+  const env = process.env;
+  if (!env.RESEND_API_KEY || !env.CONTACT_FROM_EMAIL) return null;
+  return resendConfirmation(env.RESEND_API_KEY, env.CONTACT_FROM_EMAIL, env.CONTACT_TO_EMAIL || site.contactEmail || undefined);
 }
 
 export function resolveDelivery(): ContactDelivery | null {

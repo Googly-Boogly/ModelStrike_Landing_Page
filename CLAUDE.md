@@ -30,7 +30,7 @@ Check `node_modules/next/dist/docs/` before using any Next API from memory (the 
 - **Copy lives in `src/content/`** (`site.ts`, `home.ts`, `services.ts`, `about.ts`) as typed data. Components render it; don't hard-code marketing copy in components.
 - **`src/content/site.ts` is the only place that reads `NEXT_PUBLIC_*` env vars.** Empty values must hide the UI element or fall back safely (e.g. `bookingHref` falls back to `/contact`, `socialLinks` filters out blanks, `security.txt` 404s without a security email).
 - **Pages are static by default.** Exceptions: `/contact` (`connection()`, so the "not connected" banner reflects runtime env) and `security.txt/route.ts` (`force-dynamic`, so `Expires` stays fresh). Anything time- or env-dependent at runtime needs the same treatment — or, like `CurrentYear`, render on the client.
-- **Client JS is kept minimal.** Only `MobileNav`, `ContactForm` and `CurrentYear` are `"use client"`. Keep new components as Server Components unless they need interactivity.
+- **Client JS is kept minimal.** Only `MobileNav`, `ContactForm`, `CalEmbed` and `CurrentYear` are `"use client"`. Keep new components as Server Components unless they need interactivity.
 - **Page metadata:** use `pageMetadata({ title, description, path })` from `src/lib/metadata.ts` in each page; add new routes to `src/app/sitemap.ts` and, if navigable, `primaryNav` / `footerNav` in `site.ts`.
 - **UI primitives** in `src/components/ui/`: `Section`/`Container` for page sections, `ButtonLink`/`buttonClasses` for buttons (external URLs automatically open in a new tab), `SectionHeader`, `CheckList`. Reuse them.
 - Path alias: `@/*` → `src/*`.

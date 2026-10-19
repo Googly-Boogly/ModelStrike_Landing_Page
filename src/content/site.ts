@@ -6,6 +6,12 @@
  * Anything left empty is hidden or replaced with a safe fallback in the UI.
  */
 
+/** Accepts `user/event` or a full https://cal.com/user/event URL; anything else is ignored. */
+function resolveCalLink(): string {
+  const raw = (process.env.NEXT_PUBLIC_CAL_LINK ?? "").trim().replace(/^https:\/\/(app\.)?cal\.com\//, "").replace(/^\/+|\/+$/g, "");
+  return /^[\w.-]+(\/[\w.-]+)*$/.test(raw) ? raw : "";
+}
+
 function resolveSiteUrl(): string {
   const explicit = process.env.NEXT_PUBLIC_SITE_URL;
   if (explicit) return explicit.replace(/\/+$/, "");
@@ -31,6 +37,12 @@ export const site = {
    * "Book" CTA routes to the on-site contact form instead.
    */
   bookingUrl: process.env.NEXT_PUBLIC_BOOKING_URL ?? "",
+  /**
+   * Cal.com event (`username/event-slug`) on /contact, shown once the request
+   * form is sent. When set, "Book" CTAs go to /contact and
+   * NEXT_PUBLIC_BOOKING_URL is ignored.
+   */
+  calLink: resolveCalLink(),
   /** Full public profile URLs, e.g. https://www.linkedin.com/company/... */
   social: {
     linkedin: process.env.NEXT_PUBLIC_LINKEDIN_URL ?? "",
@@ -39,7 +51,7 @@ export const site = {
   },
 } as const;
 
-export const bookingHref = site.bookingUrl || "/contact";
+export const bookingHref = site.calLink ? "/contact" : site.bookingUrl || "/contact";
 
 export type NavItem = { label: string; href: string };
 

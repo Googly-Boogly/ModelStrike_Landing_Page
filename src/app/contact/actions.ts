@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { resolveDelivery } from "@/lib/contact/delivery";
+import { resolveConfirmation, resolveDelivery } from "@/lib/contact/delivery";
 import { isRateLimited } from "@/lib/contact/rate-limit";
 import { validateContact, type FieldErrors } from "@/lib/contact/schema";
 
@@ -10,14 +10,24 @@ export type ContactFormState =
   | { status: "invalid"; message: string; errors: FieldErrors }
   | { status: "error"; message: string }
   | { status: "unavailable"; message: string }
-  | { status: "success"; message: string };
+  | { status: "success"; message: string; booker?: Booker };
+
+/** Echoed back to the visitor's own browser to prefill the Cal.com booking step. */
+export type Booker = { name: string; email: string };
+
+type SuccessState = Extract<ContactFormState, { status: "success" }>;
 
 /** Submissions faster than this are almost certainly automated. */
 const MIN_FILL_TIME_MS = 3000;
 
-const SUCCESS: ContactFormState = {
+const SUCCESS: SuccessState = {
   status: "success",
   message: "Thanks — your request has been received. We'll follow up at your work email.",
+};
+
+const SUCCESS_CONFIRMED: SuccessState = {
+  status: "success",
+  message: "Thanks — your request has been received. We've sent a confirmation to your work email and will follow up there.",
 };
 
 export async function submitContact(_previous: ContactFormState, formData: FormData): Promise<ContactFormState> {
@@ -57,5 +67,19 @@ export async function submitContact(_previous: ContactFormState, formData: FormD
     return { status: "error", message: "We couldn't send your request just now. Please try again shortly." };
   }
 
-  return SUCCESS;
+  // The request itself is delivered at this point, so a failed confirmation
+  // is logged but doesn't fail the submission — the visitor just isn't told
+  // to expect an email.
+  const booker: Booker = { name: result.data.name, email: result.data.email };
+  const confirmation = resolveConfirmation();
+  if (confirmation) {
+    try {
+      await confirmation.send(result.data.email);
+      return { ...SUCCESS_CONFIRMED, booker };
+    } catch (error) {
+      console.error(`[contact] confirmation via ${confirmation.name} failed:`, error instanceof Error ? error.message : error);
+    }
+  }
+
+  return { ...SUCCESS, booker };
 }

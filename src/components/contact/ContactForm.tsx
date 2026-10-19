@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef, startTransition, type FormEvent, typ
 import { submitContact, type ContactFormState } from "@/app/contact/actions";
 import { companySizes, developmentStages, limits, type ContactField } from "@/lib/contact/schema";
 import { buttonClasses } from "@/components/ui/Button";
+import { CalEmbed } from "./CalEmbed";
 
 const initialState: ContactFormState = { status: "idle" };
 
@@ -47,9 +48,11 @@ function Field({ name, label, hint, optional, error, className = "", children }:
 type ContactFormProps = {
   deliveryEnabled: boolean;
   contactEmail: string;
+  /** Cal.com event shown as the next step once the request is sent. */
+  calLink?: string;
 };
 
-export function ContactForm({ deliveryEnabled, contactEmail }: ContactFormProps) {
+export function ContactForm({ deliveryEnabled, contactEmail, calLink }: ContactFormProps) {
   const [state, formAction, pending] = useActionState(submitContact, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const statusRef = useRef<HTMLDivElement>(null);
@@ -77,10 +80,26 @@ export function ContactForm({ deliveryEnabled, contactEmail }: ContactFormProps)
   }
 
   if (state.status === "success") {
-    return (
+    const received = (
       <div ref={statusRef} tabIndex={-1} role="status" className="rounded-lg border border-line-strong bg-ink-900 p-8 focus:outline-none">
         <p className="font-mono text-xs tracking-[0.16em] text-strike-400 uppercase">Request received</p>
         <p className="mt-3 text-lg text-fg">{state.message}</p>
+        {calLink && <p className="mt-2 text-fg-muted">Next, pick a time for your scoping call below.</p>}
+      </div>
+    );
+    if (!calLink) return received;
+    return (
+      <div className="space-y-10">
+        {received}
+        <section id="schedule" aria-labelledby="schedule-title">
+          <h2 id="schedule-title" className="text-2xl font-semibold tracking-tight text-fg">
+            Book a scoping call
+          </h2>
+          <p className="mt-2 text-fg-muted">You&apos;ll get a calendar invite and confirmation from Cal.com by email.</p>
+          <div className="mt-6">
+            <CalEmbed calLink={calLink} prefill={state.booker} />
+          </div>
+        </section>
       </div>
     );
   }
@@ -206,7 +225,7 @@ export function ContactForm({ deliveryEnabled, contactEmail }: ContactFormProps)
           customer data.
         </p>
         <button type="submit" disabled={pending} className={buttonClasses("primary", "lg", "w-full sm:w-auto")}>
-          {pending ? "Sending…" : "Request Assessment"}
+          {pending ? "Sending…" : calLink ? "Continue to Scheduling" : "Request Assessment"}
         </button>
       </div>
     </form>

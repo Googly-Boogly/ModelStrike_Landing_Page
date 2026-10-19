@@ -13,7 +13,8 @@ import { Section } from "@/components/ui/Section";
  *   - hosting provider and region
  *   - contact form delivery (email provider, webhook target, CRM)
  *   - analytics (if any) and whether it sets cookies
- *   - scheduling tool (if NEXT_PUBLIC_BOOKING_URL is used)
+ *   - scheduling tool (Cal.com if NEXT_PUBLIC_CAL_LINK is set, or whatever
+ *     NEXT_PUBLIC_BOOKING_URL points to)
  *   - legal entity name, registered address, and applicable jurisdictions
  *   - retention periods and data subject request process
  * Update LAST_UPDATED whenever the substance changes.

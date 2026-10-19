@@ -90,6 +90,10 @@ Delivery is pluggable (`src/lib/contact/delivery.ts`):
 
 To add a provider, implement `ContactDelivery` and add a case to `resolveDelivery()`.
 
+**Cal.com scheduling:** set `NEXT_PUBLIC_CAL_LINK` (build-time) to add an inline Cal.com calendar to `/contact`. Visitors fill in the request form first; once it's delivered, the calendar appears in its place with their name and email prefilled. If no delivery provider is configured, the form can't send, so the calendar is shown up front instead and the form is optional. All "Book" buttons point to `/contact`. This is a website flow, not access control: anyone with the Cal.com event URL can still book on cal.com directly. Cal.com's origins (`app.cal.com`, `cal.com`) are added to the CSP only when it's set. Bookings made in the calendar are confirmed by Cal.com itself; the confirmation email below only covers the form.
+
+**Confirmation email:** whenever `RESEND_API_KEY` and `CONTACT_FROM_EMAIL` are set (with either provider), the visitor also gets a plain-text confirmation at the email they entered, with reply-to set to `CONTACT_TO_EMAIL` (or `NEXT_PUBLIC_CONTACT_EMAIL`). It contains no submitted content, so the form can't be used to send arbitrary text to someone else's inbox. It's sent only after the request is delivered; if it fails, the submission still succeeds and the success message simply doesn't mention a confirmation.
+
 Notes:
 - `/contact` renders per request, so the "not connected" banner and the Server Action both reflect runtime configuration.
 - The rate limiter is in-memory per server instance. On serverless hosting, add a shared store (e.g. Upstash) or platform firewall rules if abuse appears. Cloudflare Turnstile can be added inside the form and verified in `submitContact` if needed.
@@ -106,6 +110,6 @@ None by default. To add privacy-respecting analytics (Plausible, Fathom, self-ho
 
 - `NEXT_PUBLIC_SITE_URL` — **required for production** (canonicals, sitemap, OG). Falls back to Vercel's production URL, then localhost.
 - Business email (`NEXT_PUBLIC_CONTACT_EMAIL`) and security email (`NEXT_PUBLIC_SECURITY_EMAIL`, which also enables `security.txt`).
-- Booking link (`NEXT_PUBLIC_BOOKING_URL`), social links.
+- Booking: `NEXT_PUBLIC_CAL_LINK` (Cal.com `username/event-slug`, embedded on `/contact`) or an external `NEXT_PUBLIC_BOOKING_URL`; social links.
 - Founder bio and LinkedIn in `src/content/about.ts`, and a photo in `public/team/alex-taylor.jpg`.
 - Privacy policy: legal review, entity name/address, provider list, retention (see the header comment in `src/app/privacy/page.tsx`).
