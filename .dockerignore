@@ -17,4 +17,6 @@ next-env.d.ts
 # Docker files themselves
 Dockerfile
 compose.yaml
+compose.prod.yaml
+Caddyfile
 .dockerignore

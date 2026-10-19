@@ -1,0 +1,15 @@
+# Reverse proxy for production (see compose.prod.yaml).
+# Caddy obtains and renews Let's Encrypt certificates for SITE_DOMAIN
+# automatically; ports 80 and 443 must be reachable from the internet and
+# the domain's DNS (apex and www) must point at this server.
+
+{$SITE_DOMAIN} {
+	encode zstd gzip
+	# Caddy replaces any client-sent X-Forwarded-For with the real peer IP,
+	# which the contact form's rate limiter relies on.
+	reverse_proxy web:3000
+}
+
+www.{$SITE_DOMAIN} {
+	redir https://{$SITE_DOMAIN}{uri} permanent
+}

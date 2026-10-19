@@ -35,6 +35,17 @@ docker compose down
 - `.dockerignore` keeps `.env*`, `.git`, and local tooling out of the build context.
 - Terminate TLS in front of the container (Caddy, nginx, Traefik, or your platform's load balancer). HSTS is already sent.
 
+### Production on a single server (e.g. EC2)
+
+`compose.prod.yaml` adds Caddy in front of the site: it serves ports 80/443, gets and renews a Let's Encrypt certificate, redirects `www` to the apex domain, and stops publishing port 3000.
+
+1. Point the domain's apex and `www` DNS records at the server's public IP.
+2. Allow inbound TCP 80 and 443 (and UDP 443 for HTTP/3) in the firewall / security group. Port 3000 doesn't need to be open.
+3. In `.env`: `SITE_DOMAIN=example.com` and `NEXT_PUBLIC_SITE_URL=https://example.com`.
+4. `docker compose -f compose.yaml -f compose.prod.yaml up -d --build`
+
+`docker compose -f compose.yaml -f compose.prod.yaml logs -f caddy` shows certificate issuance. Keep the `caddy_data` volume; deleting it forces new certificates and Let's Encrypt rate-limits repeated issuance. Building needs ~2 GB of RAM — on smaller instances add swap first, or the build is killed.
+
 ## Team photos
 
 Add a square headshot (at least 400×400px) to `public/team/`, named after the member's `slug` in `src/content/about.ts`:
